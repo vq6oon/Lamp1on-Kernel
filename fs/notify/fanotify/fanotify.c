@@ -10,6 +10,7 @@
 #include <linux/sched/user.h>
 #include <linux/types.h>
 #include <linux/wait.h>
+#include <linux/sched/mm.h>
 
 #include "fanotify.h"
 
@@ -137,8 +138,8 @@ struct fanotify_event_info *fanotify_alloc_event(struct fsnotify_group *group,
 						 struct inode *inode, u32 mask,
 						 const struct path *path)
 {
-	struct fanotify_event_info *event;
-	gfp_t gfp = GFP_KERNEL;
+	struct fanotify_event_info *event = NULL;
+	gfp_t gfp = GFP_KERNEL_ACCOUNT;
 
 	/*
 	 * For queues with unlimited length lost events are not expected and
@@ -148,13 +149,16 @@ struct fanotify_event_info *fanotify_alloc_event(struct fsnotify_group *group,
 	if (group->max_events == UINT_MAX)
 		gfp |= __GFP_NOFAIL;
 
+	/* Whoever is interested in the event, pays for the allocation. */
+	memalloc_use_memcg(group->memcg);
+
 #ifdef CONFIG_FANOTIFY_ACCESS_PERMISSIONS
 	if (mask & FAN_ALL_PERM_EVENTS) {
 		struct fanotify_perm_event_info *pevent;
 
 		pevent = kmem_cache_alloc(fanotify_perm_event_cachep, gfp);
 		if (!pevent)
-			return NULL;
+			goto out;
 		event = &pevent->fae;
 		pevent->response = 0;
 		goto init;
@@ -162,7 +166,7 @@ struct fanotify_event_info *fanotify_alloc_event(struct fsnotify_group *group,
 #endif
 	event = kmem_cache_alloc(fanotify_event_cachep, gfp);
 	if (!event)
-		return NULL;
+		goto out;
 init: __maybe_unused
 	fsnotify_init_event(&event->fse, inode, mask);
 	event->tgid = get_pid(task_tgid(current));
@@ -173,6 +177,8 @@ init: __maybe_unused
 		event->path.mnt = NULL;
 		event->path.dentry = NULL;
 	}
+out:
+	memalloc_unuse_memcg();
 	return event;
 }
 
