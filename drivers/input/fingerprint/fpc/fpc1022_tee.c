@@ -211,7 +211,7 @@ static void fpc1022_get_irqNum(struct fpc1022_data *fpc1022)
 
 static int hw_reset(struct fpc1022_data *fpc1022)
 {
-	struct device *dev = fpc1022->dev;
+	//struct device *dev = fpc1022->dev;
 
 	pinctrl_select_state(fpc1022->pinctrl, fpc1022->st_rst_h);
 	usleep_range(FPC1022_RESET_HIGH1_US, FPC1022_RESET_HIGH1_US + 100);
@@ -301,12 +301,14 @@ static ssize_t clk_enable_set(struct device *dev,
 		//update spi clk
 		if (*buf == 49)
 			mt_spi_enable_master_clk(fpc1022->spi);
+		}
 
-		if (*buf == 48)
+		if (*buf == 48) {
 			mt_spi_disable_master_clk(fpc1022->spi);
 			return 1;
-	} else
+	} else {
 		return 0;
+	}
 }
 
 static DEVICE_ATTR(clk_enable, 0200, NULL, clk_enable_set);
@@ -331,7 +333,7 @@ static ssize_t irq_ack(struct device *device,
 		       struct device_attribute *attribute,
 		       const char *buffer, size_t count)
 {
-	struct fpc1022_data *fpc1022 = dev_get_drvdata(device);
+	//struct fpc1022_data *fpc1022 = dev_get_drvdata(device);
 	return count;
 }
 
