@@ -2246,7 +2246,7 @@ struct step_action *wmt_step_create_action(enum step_action_id act_id, int param
 
 int wmt_step_init_pd_env(void)
 {
-	g_step_env.pd_struct.step_pd_wq = create_workqueue(STEP_PERIODIC_DUMP_WORK_QUEUE);
+	g_step_env.pd_struct.step_pd_wq = alloc_workqueue("STEP_PERIODIC_DUMP_WORK_QUEUE", WQ_MEM_RECLAIM | WQ_POWER_EFFICIENT, 1);
 	if (!g_step_env.pd_struct.step_pd_wq) {
 		WMT_ERR_FUNC("create_workqueue fail\n");
 		return -1;
