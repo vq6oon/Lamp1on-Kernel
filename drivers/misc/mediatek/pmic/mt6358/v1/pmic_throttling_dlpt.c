@@ -1159,7 +1159,7 @@ void dlpt_notify_init(void)
 {
 	unsigned long dlpt_notify_interval;
 
-	dlpt_notify_interval = HZ * 30;
+	dlpt_notify_interval = HZ * 25;
 	init_timer_deferrable(&dlpt_notify_timer);
 	dlpt_notify_timer.function = dlpt_notify_task;
 	dlpt_notify_timer.data = (unsigned long)&dlpt_notify_timer;
