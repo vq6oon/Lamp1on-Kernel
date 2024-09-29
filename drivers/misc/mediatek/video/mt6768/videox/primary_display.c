@@ -277,7 +277,7 @@ void _primary_path_unlock(const char *caller)
 	if (mutex_time_period > 300000000) {
 		DISPCHECK("mutex_release_timeout1 <%lld ns>\n",
 			mutex_time_period);
-		//dump_stack();
+		dump_stack();
 	}
 
 	disp_sw_mutex_unlock(&(pgc->lock));
@@ -288,7 +288,7 @@ void _primary_path_unlock(const char *caller)
 	   (mutex_time_period < 300000000 && mutex_time_period1 < 0)) {
 		DISPCHECK("mutex_release_timeout2 <%lld ns>,<%lld ns>\n",
 			mutex_time_period1, mutex_time_period);
-		//dump_stack();
+		dump_stack();
 	}
 
 	dprec_logger_done(DPREC_LOGGER_PRIMARY_MUTEX, 0, 0);
