@@ -149,7 +149,7 @@
  * Report Pressure in multitouch
  * 1:enable(default),0:disable
 */
-#define FTS_REPORT_PRESSURE_EN                  1
+#define FTS_REPORT_PRESSURE_EN                  0
 
 /*
  * Gesture function enable
@@ -200,8 +200,8 @@
  */
 #define FTS_GET_MODULE_NUM                      0
 
-#define	FTS_TP_SELFTEST	1
-#define	FTS_PALM_EN	1
+#define	FTS_TP_SELFTEST	0
+#define	FTS_PALM_EN	0
 /*
  * module_id: mean vendor_id generally, also maybe gpio or lcm_id...
  * If means vendor_id, the FTS_MODULE_ID = PANEL_ID << 8 + VENDOR_ID
