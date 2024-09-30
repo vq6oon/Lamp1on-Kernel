@@ -542,10 +542,7 @@ static int ovl_layer_config(enum DISP_MODULE_ENUM module, unsigned int layer,
 #endif
 
 	/* check dim layer fmt */
-	if (cfg->source == OVL_LAYER_SOURCE_RESERVED) {
-		if (cfg->aen == 0)
-			DDPERR("dim layer%d ahpha enable should be 1!\n",
-				layer);
+	if ((cfg->source == OVL_LAYER_SOURCE_RESERVED) && (cfg->aen != 0)) {
 		format = UFMT_RGB888;
 	}
 	Bpp = ufmt_get_Bpp(format);
