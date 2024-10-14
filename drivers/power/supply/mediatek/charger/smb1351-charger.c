@@ -2115,7 +2115,9 @@ static int smb1351_is_charging_done(struct charger_device *chg_dev, bool *done)
 	struct smb1351_charger *chip = dev_get_drvdata(&chg_dev->dev);
 
 	*done = chip->batt_full;
+#ifdef CONFIG_MTK_ENG_BUILD
 	pr_err("charging is %s\n", chip->batt_full ? "done" : "not done");
+#endif
 	return 0;
 }
 
@@ -2259,8 +2261,9 @@ static int smb1351_get_usbchg_current(struct charger_device *chg_dev, u32 *uA)
 	struct smb1351_charger *chip = dev_get_drvdata(&chg_dev->dev);
 	u8 reg = 0;
 	int rc = 0, i = 0;
-
+#ifdef CONFIG_MTK_ENG_BUILD
 	pr_err("get usbchg current.\n");
+#endif
 
 	rc = smb1351_read_reg(chip, CHG_CURRENT_CTRL_REG, &reg);
 	if (rc) {
@@ -2352,8 +2355,9 @@ static int smb1351_get_fastchg_current(struct charger_device *chg_dev, u32 *uA)
 	u8 reg, i;
 	int rc = 0;
 
+#ifdef CONFIG_MTK_ENG_BUILD
 	pr_err("get fastchg current\n");
-
+#endif
 	rc = smb1351_read_reg(chip, STATUS_3_REG, &reg);
 	if (rc < 0) {
 		pr_err("Couldn't read STATUS_3_REG rc=%d\n", rc);
