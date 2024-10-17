@@ -1225,10 +1225,12 @@ err_fts_extra_proc_init_failed:
 	FTS_FUNC_EXIT();
 	return ret;
 
+#if FOCAL_LOCKDOWN
 err_lockdown_proc_init_failed:
 	focal_lockdown_proc_deinit();
 	FTS_FUNC_EXIT();
 	return ret;
+#endif
 
 err_fts_tp_data_dump_proc_init_failed:
 	fts_tp_data_dump_proc_exit();

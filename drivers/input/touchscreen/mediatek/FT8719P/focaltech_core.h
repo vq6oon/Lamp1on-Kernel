@@ -101,7 +101,7 @@
 
 #define FTX_MAX_COMPATIBLE_TYPE             4
 #define FTX_MAX_COMMMAND_LENGTH             16
-#define FOCAL_LOCKDOWN 1
+#define FOCAL_LOCKDOWN 0
 #if FOCAL_LOCKDOWN
 int focal_proc_tp_lockdown_info(void);
 void focal_lockdown_proc_deinit(void);

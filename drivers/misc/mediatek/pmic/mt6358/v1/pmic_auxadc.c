@@ -639,7 +639,9 @@ int pmic_get_auxadc_value(int list)
 #endif
 		if (is_charging == 0)
 			bat_cur = 0 - bat_cur;
+#ifdef CONFIG_MTK_ENG_BUILD
 		pr_notice("[CH3_DBG] bat_cur = %d\n", bat_cur);
+#endif
 	}
 	if (list == AUXADC_LIST_HPOFS_CAL) {
 		ret = iio_read_channel_raw(

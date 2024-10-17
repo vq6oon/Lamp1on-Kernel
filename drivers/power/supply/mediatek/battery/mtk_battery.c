@@ -491,7 +491,9 @@ void otg_thermal_limit(void)
 		return;
 	}
 	if (!primary_charger) {
+#ifdef CONFIG_MTK_ENG_BUILD
 		pr_err("primary_charger is NULL\n");
+#endif
 		primary_charger = get_charger_by_name("primary_chg");
 	}
 
@@ -735,7 +737,9 @@ void battery_update(struct battery_data *bat_data)
 	bool chg_done = false;
 
 	if (!primary_charger) {
+#ifdef CONFIG_MTK_ENG_BUILD
 		pr_err("primary_charger is NULL\n");
+#endif
 		primary_charger = get_charger_by_name("primary_chg");
 	}
 	charger_dev_is_charging_done(primary_charger, &chg_done);
@@ -4211,12 +4215,14 @@ static void otg_boost_limit_work(struct work_struct *work)
 	current_now = fgcurrent * 100;
 	pr_err("dhx--state:%d--current now = %d\n", b_ischarging, current_now);
 	if (!primary_charger) {
+#ifdef CONFIG_MTK_ENG_BUILD
 		pr_err("primary_charger is NULL\n");
+#endif
 		primary_charger = get_charger_by_name("primary_chg");
 	}
 	if (otg_limit == 1) {
 		pr_err("phone is to high skip batterty otg boost check\n");
-		schedule_delayed_work(&otg_boost_current_work, msecs_to_jiffies(10000));
+		queue_delayed_work(system_power_efficient_wq, &otg_boost_current_work, msecs_to_jiffies(10000));
 		return;
 	}
 
@@ -4242,7 +4248,7 @@ static void otg_boost_limit_work(struct work_struct *work)
 		otg_ibat_limit = 1;
 		pr_err("dhx---set otg current 1A\n");
 	}
-	schedule_delayed_work(&otg_boost_current_work, msecs_to_jiffies(10000));
+	queue_delayed_work(system_power_efficient_wq, &otg_boost_current_work, msecs_to_jiffies(10000));
 }
 
 
@@ -4288,7 +4294,7 @@ static int __init battery_probe(struct platform_device *dev)
 
 	mtk_battery_init(dev);
 	INIT_DELAYED_WORK(&otg_boost_current_work, otg_boost_limit_work);
-	schedule_delayed_work(&otg_boost_current_work, msecs_to_jiffies(10000));
+	queue_delayed_work(system_power_efficient_wq, &otg_boost_current_work, msecs_to_jiffies(10000));
 	/* Power supply class */
 #if !defined(CONFIG_MTK_DISABLE_GAUGE)
 	battery_main.psy =
