@@ -465,6 +465,7 @@ static inline struct devfreq *devfreq_get_devfreq_by_node(struct device_node *no
  * backward compatibility implementations of these functions.
  */
 
+#ifndef array3_size // fix for 4.14.354-openela
 static inline size_t __must_check size_mul(size_t factor1, size_t factor2)
 {
 	size_t ret_val;
@@ -492,6 +493,7 @@ static inline size_t __must_check size_sub(size_t minuend, size_t subtrahend)
 		return SIZE_MAX;
 	return ret_val;
 }
+#endif
 #endif
 /* clang-format on */
 
