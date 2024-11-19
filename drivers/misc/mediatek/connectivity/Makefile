@@ -70,7 +70,7 @@ endif
         # For FM built-in mode
         # for fmradio options
         FM_CHIP_ID := 6768
-        $(info FM_CHIP_ID is [${FM_CHIP_ID}])
+        #$(info FM_CHIP_ID is [${FM_CHIP_ID}])
 
         ifneq (,$(filter $(CONFIG_MTK_COMBO_CHIP), "CONSYS_6885"))
             export CFG_BUILD_CONNAC2=true
@@ -81,9 +81,9 @@ endif
         FM_CHIP := mt6631
         export CFG_FM_CHIP_ID=6768
         export CFG_FM_CHIP=mt6631
-        $(info CFG_FM_CHIP_ID is [${CFG_FM_CHIP_ID}])
-        $(info CFG_FM_CHIP is [${CFG_FM_CHIP}])
-        $(info CFG_BUILD_CONNAC2 is [${CFG_BUILD_CONNAC2}])
+        #$(info CFG_FM_CHIP_ID is [${CFG_FM_CHIP_ID}])
+        #$(info CFG_FM_CHIP is [${CFG_FM_CHIP}])
+        #$(info CFG_BUILD_CONNAC2 is [${CFG_BUILD_CONNAC2}])
 
         obj-y += fmradio_drv/
     endif

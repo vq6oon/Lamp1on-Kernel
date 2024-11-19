@@ -23,7 +23,7 @@ endif
 ifndef TOP
     TOP := $(srctree)/..
 endif
-$(info os option: $(os))
+#$(info os option: $(os))
 # ---------------------------------------------------
 # ALPS Setting
 # ---------------------------------------------------
@@ -48,8 +48,8 @@ ifeq ($(MTK_COMBO_CHIP),)
 MTK_COMBO_CHIP = MT6632
 endif
 
-$(info $$MTK_PLATFORM is [${MTK_PLATFORM}])
-$(info $$WLAN_CHIP_ID is [${WLAN_CHIP_ID}])
+#$(info $$MTK_PLATFORM is [${MTK_PLATFORM}])
+#$(info $$WLAN_CHIP_ID is [${WLAN_CHIP_ID}])
 
 #ifneq ($(CONFIG_MTK_EMI),)
 ccflags-y += -DCONFIG_MTK_EMI=1
@@ -427,7 +427,7 @@ obj-$(CONFIG_MTK_COMBO_WIFI) += $(MODULE_NAME).o
 endif
 
 ifeq ($(CONFIG_WLAN_DRV_BUILD_IN),y)
-$(warning $(MODULE_NAME) build-in boot.img)
+#$(warning $(MODULE_NAME) build-in boot.img)
 obj-y += $(MODULE_NAME).o
 ccflags-y += -DCONFIG_WLAN_DRV_BUILD_IN=1
 else
@@ -703,7 +703,7 @@ SERVICE_DIR  := wlan_service/
 
 #ifneq ($(findstring wlan_service,$(MTK_WLAN_SERVICE_PATH)),)
 MTK_WLAN_SERVICE=yes
-$(info SERVICE_DIR is [{$(MTK_WLAN_SERVICE_PATH)}])
+#$(info SERVICE_DIR is [{$(MTK_WLAN_SERVICE_PATH)}])
 #endif
 
 #ifeq ($(MTK_WLAN_SERVICE), yes)
@@ -713,7 +713,7 @@ ccflags-y += -I$(src)/$(SERVICE_DIR)include
 ccflags-y += -I$(src)/$(SERVICE_DIR)service/include
 ccflags-y += -I$(src)/$(SERVICE_DIR)glue/osal/include
 ccflags-y += -I$(src)/$(SERVICE_DIR)glue/hal/include
-$(info $$CCFLAG is [{$(ccflags-y)}])
+#$(info $$CCFLAG is [{$(ccflags-y)}])
 SERVICE_OBJS := $(SERVICE_DIR)agent/agent.o \
                 $(SERVICE_DIR)service/service_test.o \
                 $(SERVICE_DIR)service/test_engine.o \
@@ -721,7 +721,7 @@ SERVICE_OBJS := $(SERVICE_DIR)agent/agent.o \
                 $(SERVICE_DIR)glue/osal/gen4m/net_adaption_gen4m.o \
                 $(SERVICE_DIR)glue/hal/gen4m/operation_gen4m.o
 $(MODULE_NAME)-objs  += $(SERVICE_OBJS)
-$(info $$MTK_WLAN_SERVICE is [{$(SERVICE_OBJS)}])
+#$(info $$MTK_WLAN_SERVICE is [{$(SERVICE_OBJS)}])
 #else
 #ccflags-y += -DCONFIG_WLAN_SERVICE=0
 #ccflags-y += -DCONFIG_TEST_ENGINE_OFFLOAD=0
