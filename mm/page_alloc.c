@@ -1844,7 +1844,10 @@ static bool check_new_pcp(struct page *page)
 #else
 static bool check_pcp_refill(struct page *page)
 {
-	return check_new_page(page);
+	if (debug_pagealloc_enabled())
+		return check_new_page(page);
+	else
+		return false;
 }
 static bool check_new_pcp(struct page *page)
 {
@@ -3615,7 +3618,9 @@ check_priority:
 		ret = true;
 	}
 out:
+#if !defined(CONFIG_DISABLE_OOM_KILLER)
 	trace_compact_retry(order, priority, compact_result, retries, max_retries, ret);
+#endif
 	return ret;
 }
 #else
@@ -3938,8 +3943,10 @@ should_reclaim_retry(gfp_t gfp_mask, unsigned order,
 		 */
 		wmark = __zone_watermark_ok(zone, order, min_wmark,
 				ac_classzone_idx(ac), alloc_flags, available);
+#if !defined(CONFIG_DISABLE_OOM_KILLER)
 		trace_reclaim_retry_zone(z, order, reclaimable,
 				available, min_wmark, *no_progress_loops, wmark);
+#endif
 		if (wmark) {
 			/*
 			 * If we didn't make any progress and have a lot of
