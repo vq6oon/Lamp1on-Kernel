@@ -419,7 +419,9 @@ static int bms_get_property(struct power_supply *psy,
 		val->intval = gm.battery_id;
 		break;
 	case POWER_SUPPLY_PROP_CHARGE_FULL:
+#ifdef CONFIG_MTK_ENG_BUILD
 		pr_err("mtk_qmax_agin:%d qmax:%d\n", mtk_qmax_aging, qmax);
+#endif
 		if (mtk_qmax_aging < 50200)
 			qmax = mtk_qmax_aging * 100;
 		val->intval = qmax;
@@ -566,7 +568,9 @@ static int battery_get_property(struct power_supply *psy,
 		val->intval = battery_get_bat_avg_current() * 100;
 		break;
 	case POWER_SUPPLY_PROP_CHARGE_FULL:
+#ifdef CONFIG_MTK_ENG_BUILD
 		pr_err("mtk_qmax_agin:%d qmax:%d\n", mtk_qmax_aging, qmax);
+#endif
 		if (mtk_qmax_aging < 50200)
 			qmax = mtk_qmax_aging * 100;
 		val->intval = qmax;
@@ -4213,7 +4217,9 @@ static void otg_boost_limit_work(struct work_struct *work)
 		fgcurrent = 0 - fgcurrent;
 
 	current_now = fgcurrent * 100;
+#ifdef CONFIG_MTK_ENG_BUILD
 	pr_err("dhx--state:%d--current now = %d\n", b_ischarging, current_now);
+#endif
 	if (!primary_charger) {
 #ifdef CONFIG_MTK_ENG_BUILD
 		pr_err("primary_charger is NULL\n");
@@ -4242,11 +4248,15 @@ static void otg_boost_limit_work(struct work_struct *work)
 	if (count_low >= 6)	{
 		charger_dev_set_otg_current(primary_charger, 1800000);
 		otg_ibat_limit = 0;
+#ifdef CONFIG_MTK_ENG_BUILD
 		pr_err("dhx---set otg current 1.8A\n");
+#endif
 	} else if (count_high == 6)	{
 		charger_dev_set_otg_current(primary_charger, 1000000);
 		otg_ibat_limit = 1;
+#ifdef CONFIG_MTK_ENG_BUILD
 		pr_err("dhx---set otg current 1A\n");
+#endif
 	}
 	queue_delayed_work(system_power_efficient_wq, &otg_boost_current_work, msecs_to_jiffies(10000));
 }
