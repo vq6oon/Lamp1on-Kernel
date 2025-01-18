@@ -61,7 +61,7 @@ const char * const *kbase_gator_hwcnt_init_names(uint32_t *total_counters)
 	if (!kbdev)
 		return NULL;
 
-	gpu_id = &kbdev->gpu_props.gpu_id;
+	gpu_id = kbdev->gpu_props.gpu_id.product_model;
 
 	
 	switch (gpu_id & GPU_ID2_PRODUCT_MODEL) {
@@ -169,7 +169,7 @@ struct kbase_gator_hwcnt_handles *kbase_gator_hwcnt_init(struct kbase_gator_hwcn
 
 	in_out_info->nr_cores = hand->kbdev->gpu_props.num_cores;
 	in_out_info->nr_core_groups = hand->kbdev->gpu_props.num_core_groups;
-	/* in_out_info->gpu_id = hand->kbdev->gpu_props.props.raw_props.gpu_id; */
+	in_out_info->gpu_id = hand->kbdev->gpu_props.gpu_id.product_model;
 
 	/* If we are using a v4 device (Mali-T6xx or Mali-T72x) */
 	/// @{ MTK
