@@ -218,7 +218,6 @@ struct kbase_io_history {
 	struct kbase_io_access *buf;
 };
 
-
 /**
  * struct kbase_debug_copy_buffer - information about the buffer to be copied.
  *

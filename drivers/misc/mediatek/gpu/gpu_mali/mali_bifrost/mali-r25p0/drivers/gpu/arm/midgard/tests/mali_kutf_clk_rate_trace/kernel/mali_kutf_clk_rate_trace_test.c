@@ -75,6 +75,7 @@ struct clk_trace_snapshot {
  * struct kutf_clk_rate_trace_fixture_data - Fixture data for the test.
  * @kbdev:            kbase device for the GPU.
  * @listener:         Clock rate change listener structure.
+ * @invoke_notify:    When true, invoke notify command is being executed.
  * @snapshot:         Clock trace update snapshot data array. A snapshot
  *                    for each clock contains info accumulated beteen two
  *                    GET_TRACE_SNAPSHOT requests.
@@ -91,6 +92,7 @@ struct clk_trace_snapshot {
 struct kutf_clk_rate_trace_fixture_data {
 	struct kbase_device *kbdev;
 	struct kbase_clk_rate_listener listener;
+	bool invoke_notify;
 	struct clk_trace_snapshot snapshot[BASE_MAX_NR_CLOCKS_REGULATORS];
 	unsigned int nclks;
 	unsigned int pm_ctx_cnt;
@@ -119,6 +121,7 @@ static const struct kbasep_cmd_name_pair kbasep_portal_cmd_name_map[] = {
 	{ PORTAL_CMD_INC_PM_CTX_CNT, INC_PM_CTX_CNT },
 	{ PORTAL_CMD_DEC_PM_CTX_CNT, DEC_PM_CTX_CNT },
 	{ PORTAL_CMD_CLOSE_PORTAL, CLOSE_PORTAL },
+	{ PORTAL_CMD_INVOKE_NOTIFY_42KHZ, INVOKE_NOTIFY_42KHZ },
 };
 
 /* Global pointer for the kutf_portal_trace_write() to use. When
@@ -144,11 +147,15 @@ static void kutf_portal_trace_write(struct kbase_clk_rate_listener *listener, u3
 
 	data = container_of(listener, struct kutf_clk_rate_trace_fixture_data, listener);
 
-	lockdep_assert_held(data->kbdev->pm.clk_rtm.lock);
+	lockdep_assert_held(&data->kbdev->pm.clk_rtm.lock);
 
 	if (WARN_ON(g_ptr_portal_data == NULL))
 		return;
 	if (WARN_ON(index >= g_ptr_portal_data->nclks))
+		return;
+
+	/* This callback is triggered by invoke notify command, skipping */
+	if (data->invoke_notify)
 		return;
 
 	snapshot = &g_ptr_portal_data->snapshot[index];
@@ -522,6 +529,9 @@ static bool kutf_clk_trace_process_portal_cmd(struct kutf_context *context,
 	case PORTAL_CMD_CLOSE_PORTAL:
 		errmsg = kutf_clk_trace_do_close_portal(context, cmd);
 		break;
+	case PORTAL_CMD_INVOKE_NOTIFY_42KHZ:
+		errmsg = kutf_clk_trace_do_invoke_notify_42k(context, cmd);
+		break;
 	default:
 		pr_warn("Don't know how to handle portal_cmd: %d, abort session.\n",
 			cmd->portal_cmd);
@@ -814,6 +824,7 @@ static void *mali_kutf_clk_rate_trace_create_fixture(struct kutf_context *contex
 	if (data->nclks) {
 		/* Subscribe this test server portal */
 		data->listener.notify = kutf_portal_trace_write;
+		data->invoke_notify = false;
 
 		kbase_clk_rate_trace_manager_subscribe(&kbdev->pm.clk_rtm, &data->listener);
 		/* Update the kutf_server_portal fixture_data pointer */

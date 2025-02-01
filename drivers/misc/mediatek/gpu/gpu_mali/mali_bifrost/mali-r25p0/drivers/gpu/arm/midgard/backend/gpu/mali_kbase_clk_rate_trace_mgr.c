@@ -27,6 +27,7 @@
 #include <mali_kbase_config_defaults.h>
 #include <linux/clk.h>
 #include <linux/pm_opp.h>
+#include <asm/div64.h>
 #include "backend/gpu/mali_kbase_clk_rate_trace_mgr.h"
 
 #ifdef CONFIG_TRACE_POWER_GPU_FREQUENCY
@@ -38,42 +39,6 @@
 #ifndef CLK_RATE_TRACE_OPS
 #define CLK_RATE_TRACE_OPS (NULL)
 #endif
-
-/**
- * gpu_clk_rate_notify_all() - Notify all clock rate listeners.
- *
- * @clk_rtm:     Clock rate manager instance.
- * @clk_data:    Clock data being modified.
- * @new_rate:    New clock frequency(Hz)
- *
- * kbase_clk_rate_trace_manager:lock must be locked.
- */
-static void gpu_clk_rate_notify_all(
-	struct kbase_clk_rate_trace_manager *clk_rtm,
-	struct kbase_clk_data *clk_data,
-	unsigned long new_rate)
-{
-	u32 clk_index;
-	struct kbase_clk_rate_listener *pos;
-	struct kbase_device *kbdev;
-
-	lockdep_assert_held(&clk_rtm->lock);
-
-	kbdev = container_of(clk_rtm, struct kbase_device, pm.clk_rtm);
-	clk_index = clk_data->index;
-
-
-	dev_dbg(kbdev->dev, "GPU clock %u rate changed to %lu",
-		clk_index, new_rate);
-
-	/* Raise standard `power/gpu_frequency` ftrace event */
-	trace_gpu_frequency(new_rate, clk_index);
-
-	/* Notify the listeners. */
-	list_for_each_entry(pos, &clk_rtm->listeners, node) {
-		pos->notify(pos, clk_index, new_rate);
-	}
-}
 
 /**
  * get_clk_rate_trace_callbacks() - Returns pointer to clk trace ops.

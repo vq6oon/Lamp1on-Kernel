@@ -273,12 +273,7 @@ static const struct kbase_device_init dev_init[] = {
 	  "Misc device registration failed" },
 	{ kbase_gpuprops_populate_user_buffer, kbase_gpuprops_free_user_buffer,
 	  "GPU property population failed" },
-/// MTK: r25p0 remove this temporarily, or bifrost gpu will loading fail and crash when kernel init
-// this will fix with ARM's next DDK version @{
-/*
 	{ NULL, kbase_dummy_job_wa_cleanup, NULL },
-			*/
-/// @}
 	{ kbase_device_late_init, kbase_device_late_term, "Late device initialization failed" },
 };
 
@@ -306,6 +301,7 @@ int kbase_device_init(struct kbase_device *kbdev)
 
 	kbase_device_id_init(kbdev);
 	kbase_disjoint_init(kbdev);
+
 	for (i = 0; i < ARRAY_SIZE(dev_init); i++) {
 		if (dev_init[i].init) {
 			err = dev_init[i].init(kbdev);
@@ -318,6 +314,7 @@ int kbase_device_init(struct kbase_device *kbdev)
 			}
 		}
 	}
+
 	return err;
 }
 
