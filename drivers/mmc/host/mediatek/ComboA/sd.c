@@ -2226,10 +2226,10 @@ int msdc_pio_read(struct msdc_host *host, struct mmc_data *data)
 
 		for (i = 0; i < totalpages; i++) {
 			kaddr[i] = (ulong) kmap(hmpage + i);
-			if ((i > 0) && ((kaddr[i] - kaddr[i - 1]) != PAGE_SIZE))
-				flag = 1;
 			if (!kaddr[i])
 				ERR_MSG("msdc0:kmap failed %lx", kaddr[i]);
+			if ((i > 0) && ((kaddr[i] - kaddr[i - 1]) != PAGE_SIZE))
+				flag = 1;
 		}
 
 		ptr = sg_virt(sg);
@@ -2426,10 +2426,10 @@ int msdc_pio_write(struct msdc_host *host, struct mmc_data *data)
 		/* Kmap all need pages, */
 		for (i = 0; i < totalpages; i++) {
 			kaddr[i] = (ulong) kmap(hmpage + i);
-			if ((i > 0) && ((kaddr[i] - kaddr[i - 1]) != PAGE_SIZE))
-				flag = 1;
 			if (!kaddr[i])
 				ERR_MSG("msdc0:kmap failed %lx\n", kaddr[i]);
+			if ((i > 0) && ((kaddr[i] - kaddr[i - 1]) != PAGE_SIZE))
+				flag = 1;
 		}
 
 		ptr = sg_virt(sg);
@@ -3788,7 +3788,7 @@ static void msdc_dump_trans_error(struct msdc_host   *host,
 
 	if (is_card_sdio(host) &&
 	    (host->sdio_error != -EILSEQ) &&
-	    (cmd->opcode == 53) &&
+	    (cmd->opcode == 53) && data &&
 	    (sg_dma_len(data->sg) > 4)) {
 		host->sdio_error = -EILSEQ;
 		ERR_MSG("XXX SDIO Error ByPass");
