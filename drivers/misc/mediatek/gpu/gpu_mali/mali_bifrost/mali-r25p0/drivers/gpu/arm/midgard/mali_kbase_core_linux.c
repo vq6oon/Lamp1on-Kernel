@@ -2595,7 +2595,7 @@ exit:
  * @dev:	The device with sysfs file is for
  * @attr:	The attributes of the sysfs file
  * @buf:	The value written to the sysfs file
- * @count:	The number of bytes written to the sysfs file
+ * @count:	The number of bytes to write to the sysfs file
  *
  * This function is called when the core_mask sysfs file is written to.
  *
@@ -5894,7 +5894,7 @@ static int kbase_platform_device_probe(struct platform_device *pdev)
         mtk_bandwith_resource_init(kbdev);
 #endif
 
-		#if (KERNEL_VERSION(6, 1, 0) <= LINUX_VERSION_CODE)
+#if (KERNEL_VERSION(6, 1, 0) <= LINUX_VERSION_CODE)
 		/* Since upstream is not exporting mmap_min_addr, kbase at the
 		 * moment is unable to track possible kernel changes via sysfs.
 		 * Flag this out in a device info message.
