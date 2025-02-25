@@ -454,7 +454,7 @@ void nvt_sw_reset_idle(void)
 	//---MCU idle cmds to SWRST_N8_ADDR---
 	nvt_write_addr(SWRST_N8_ADDR, 0xAA);
 
-	msleep(15);
+	usleep_range(15000, 16000);
 }
 
 /*******************************************************
@@ -507,7 +507,7 @@ int32_t nvt_clear_fw_status(void)
 		if (buf[1] == 0x00)
 			break;
 
-		usleep_range(10000, 10000);
+		usleep_range(10000, 11000);
 	}
 
 	if (i >= retry) {
@@ -543,7 +543,7 @@ int32_t nvt_check_fw_status(void)
 		if ((buf[1] & 0xF0) == 0xA0)
 			break;
 
-		usleep_range(10000, 10000);
+		usleep_range(10000, 11000);
 	}
 
 	if (i >= retry) {
@@ -590,7 +590,7 @@ int32_t nvt_check_fw_reset_state(RST_COMPLETE_STATE check_reset_state)
 			break;
 		}
 
-		usleep_range(10000, 10000);
+		usleep_range(10000, 11000);
 	}
 
 	return ret;
@@ -607,7 +607,6 @@ return:
 int32_t nvt_read_pid(void)
 {
 	uint8_t buf[4] = {0};
-	int32_t ret = 0;
 
 	//---set xdata index to EVENT BUF ADDR---
 	nvt_set_page(ts->mmap->EVENT_BUF_ADDR | EVENT_MAP_PROJECTID);
@@ -625,7 +624,7 @@ int32_t nvt_read_pid(void)
 
 	NVT_LOG("PID=%04X\n", ts->nvt_pid);
 
-	return ret;
+	return 0;
 }
 
 /*******************************************************
@@ -1301,8 +1300,6 @@ static irqreturn_t nvt_ts_work_func(int irq, void *data)
 	uint32_t position = 0;
 	uint32_t input_x = 0;
 	uint32_t input_y = 0;
-	uint32_t input_w = 0;
-	uint32_t input_p = 0;
 	uint8_t input_id = 0;
 #if MT_PROTOCOL_B
 	uint8_t press_id[TOUCH_MAX_FINGER_NUM] = {0};
@@ -1387,37 +1384,20 @@ static irqreturn_t nvt_ts_work_func(int irq, void *data)
 	}
 #endif
 
-	finger_cnt = 0;
-
 	for (i = 0; i < ts->max_touch_num; i++) {
 		position = 1 + 6 * i;
-		input_id = (uint8_t)(point_data[position + 0] >> 3);
+		input_id = (uint8_t) (point_data[position] >> 3);
+
 		if ((input_id == 0) || (input_id > ts->max_touch_num))
 			continue;
 
-		if (((point_data[position] & 0x07) == 0x01) || ((point_data[position] & 0x07) == 0x02)) {	//finger down (enter & moving)
+		if (likely(((point_data[position] & 0x07) == 0x01) || ((point_data[position] & 0x07) == 0x02))) {	//finger down (enter & moving)
 #if NVT_TOUCH_ESD_PROTECT
 			/* update interrupt timer */
 			irq_timer = jiffies;
 #endif /* #if NVT_TOUCH_ESD_PROTECT */
-			input_x = (uint32_t)(point_data[position + 1] << 4) + (uint32_t) (point_data[position + 3] >> 4);
-			input_y = (uint32_t)(point_data[position + 2] << 4) + (uint32_t) (point_data[position + 3] & 0x0F);
-			if ((input_x < 0) || (input_y < 0))
-				continue;
-			if ((input_x > ts->abs_x_max) || (input_y > ts->abs_y_max))
-				continue;
-			input_w = (uint32_t)(point_data[position + 4]);
-			if (input_w == 0)
-				input_w = 1;
-			if (i < 2) {
-				input_p = (uint32_t)(point_data[position + 5]) + (uint32_t)(point_data[i + 63] << 8);
-				if (input_p > TOUCH_FORCE_NUM)
-					input_p = TOUCH_FORCE_NUM;
-			} else {
-				input_p = (uint32_t)(point_data[position + 5]);
-			}
-			if (input_p == 0)
-				input_p = 1;
+			input_x = (uint32_t) (point_data[position + 1] << 4) + (uint32_t) (point_data[position + 3] >> 4);
+			input_y = (uint32_t) (point_data[position + 2] << 4) + (uint32_t) (point_data[position + 3] & 0x0F);
 
 #if MT_PROTOCOL_B
 			press_id[input_id - 1] = 1;
@@ -1430,11 +1410,9 @@ static irqreturn_t nvt_ts_work_func(int irq, void *data)
 
 			input_report_abs(ts->input_dev, ABS_MT_POSITION_X, input_x);
 			input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, input_y);
-			input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, input_w);
-			input_report_abs(ts->input_dev, ABS_MT_PRESSURE, input_p);
+			input_report_abs(ts->input_dev, ABS_MT_PRESSURE, TOUCH_FORCE_NUM);
 
-#if MT_PROTOCOL_B
-#else /* MT_PROTOCOL_B */
+#if !(MT_PROTOCOL_B) /* MT_PROTOCOL_B */
 			input_mt_sync(ts->input_dev);
 #endif /* MT_PROTOCOL_B */
 
@@ -1444,9 +1422,8 @@ static irqreturn_t nvt_ts_work_func(int irq, void *data)
 
 #if MT_PROTOCOL_B
 	for (i = 0; i < ts->max_touch_num; i++) {
-		if (press_id[i] != 1) {
+		if (likely(press_id[i] != 1)) {
 			input_mt_slot(ts->input_dev, i);
-			input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0);
 			input_report_abs(ts->input_dev, ABS_MT_PRESSURE, 0);
 			input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER, false);
 		}
@@ -1550,7 +1527,7 @@ static int8_t nvt_ts_check_chip_ver_trim(void)
 			}
 		}
 
-		msleep(10);
+		usleep_range(10000, 11000);
 	}
 
 out:
@@ -1700,7 +1677,7 @@ static int32_t nvt_ts_probe(struct spi_device *client)
 #endif
 
 	// need 10ms delay after POR(power on reset)
-	msleep(10);
+	usleep_range(10000, 11000);
 
 	//---check chip version trim---
 	ret = nvt_ts_check_chip_ver_trim();
@@ -1760,7 +1737,7 @@ static int32_t nvt_ts_probe(struct spi_device *client)
 #endif
 
 #if WAKEUP_GESTURE
-	for (retry = 0; retry < (sizeof(gesture_key_array) / sizeof(gesture_key_array[0])); retry++) {
+	for (retry = 0; retry < ARRAY_SIZE(gesture_key_array); retry++) {
 		input_set_capability(ts->input_dev, EV_KEY, gesture_key_array[retry]);
 	}
 	ts->input_dev->event = nvt_gesture_switch;
